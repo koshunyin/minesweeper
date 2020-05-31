@@ -25,4 +25,8 @@ module.exports = Object.freeze({
     GAME_STATUS_WIN: 3,
     GAME_STATUS_LOSE: 4,
     DIGIT_HEIGHT: 23,
+    DIFFICULTY_EASY: 0,
+    DIFFICULTY_MEDIUM: 1,
+    DIFFICULTY_HARD: 2,
+    DIFFICULTY_CUSTOM: 3,
 });

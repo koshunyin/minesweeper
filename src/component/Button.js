@@ -37,7 +37,7 @@ export default class Button extends React.Component {
 
         return (
             <div
-                className='comp-button centre'
+                className='comp-button'
                 style={{ backgroundPosition: '-29px -' + (offset * constants.BUTTON_HEIGHT) + 'px' }}
                 onMouseDown={(e) => this.handleMouseEvent(e, constants.MOUSE_DOWN)}
                 onMouseUp={(e) => this.handleMouseEvent(e, constants.MOUSE_UP)}

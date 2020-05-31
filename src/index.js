@@ -10,4 +10,4 @@ ReactDOM.render(
 );
 
 // https://create-react-app.dev/docs/making-a-progressive-web-app/
-serviceWorker.unregister();
+serviceWorker.register();
