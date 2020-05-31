@@ -12,6 +12,7 @@ export default class Board extends React.Component {
         this.board_value = arr2D.create(this.props.board_height, this.props.board_width, 0);
         this.non_bomb_tiles = this.props.board_width * this.props.board_height - this.props.bomb_count;
         this.state = {
+            enabled: true,
             started: false,
             mouse_button: 0,
             peek: [],
@@ -64,7 +65,7 @@ export default class Board extends React.Component {
         // If it's bomb, game over
         else if (this.board_value[row][col] === constants.BOMB_VALUE) {
             this.setState({ board_wrong_bomb: this.getId(row, col) });
-            this.handleGameOver();
+            this.handleGameLose();
         }
 
 
@@ -201,7 +202,7 @@ export default class Board extends React.Component {
         })
     }
 
-    handleGameOver = () => {
+    handleGameLose = () => {
         let arr_clicked = this.state.board_clicked;
         let arr_wrong_flag = this.state.wrong_flag;
 
@@ -217,8 +218,11 @@ export default class Board extends React.Component {
             }
         }
 
-        this.setState({ board_clicked: arr_clicked });
-        this.setState({ wrong_flag: arr_wrong_flag });
+        this.setState({
+            board_clicked: arr_clicked,
+            wrong_flag: arr_wrong_flag,
+            enabled: false
+        });
         this.props.notifyGameStatus(constants.GAME_STATUS_LOSE);
     }
 
@@ -234,7 +238,10 @@ export default class Board extends React.Component {
             }
         }
 
-        this.setState({ board_flagged: arr });
+        this.setState({
+            board_flagged: arr,
+            enabled: false
+        });
         this.props.notifyGameStatus(constants.GAME_STATUS_WIN);
     }
 
@@ -255,7 +262,7 @@ export default class Board extends React.Component {
                     value={this.board_value[row][col]}
                     clicked={this.state.board_clicked[row][col]}
                     flagged={this.state.board_flagged[row][col]}
-                    notifyMouseEvent={this.handleTileMouseEvent}
+                    notifyMouseEvent={this.state.enabled ? this.handleTileMouseEvent : null}
                     row={row}
                     col={col}
                 ></Tile>
