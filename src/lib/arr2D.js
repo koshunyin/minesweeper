@@ -94,3 +94,17 @@ export function toggle(arr, row, col){
   arr[row][col] = !arr[row][col];
   return arr;
 }
+
+// Call function on each cell in 2D array
+export function map(arr, fn){
+  let rows = arr.length;
+  let cols = arr[0].length;
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      fn(arr, i, j);
+    }
+  }
+
+  return arr;
+}

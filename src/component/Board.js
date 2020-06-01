@@ -9,17 +9,14 @@ export default class Board extends React.Component {
     constructor(props) {
         super(props);
 
-        this.board_value = arr2D.create(this.props.board_height, this.props.board_width, 0);
+        this.tile_value = arr2D.create(this.props.board_height, this.props.board_width, 0);
         this.non_bomb_tiles = this.props.board_width * this.props.board_height - this.props.bomb_count;
         this.state = {
             enabled: true,
             started: false,
             mouse_button: 0,
             peek: [],
-            wrong_flag: [],
-            board_wrong_bomb: '',
-            board_clicked: arr2D.create(this.props.board_height, this.props.board_width, false),
-            board_flagged: arr2D.create(this.props.board_height, this.props.board_width, false)
+            tile_state: arr2D.create(this.props.board_height, this.props.board_width, constants.TILE_STATE_INIT)
         };
     }
 
@@ -28,12 +25,12 @@ export default class Board extends React.Component {
         let arr;
         let min_non_bomb_tiles = 9;
 
-        if(start_row === 0 || start_row === this.props.board_height - 1)
+        if (start_row === 0 || start_row === this.props.board_height - 1)
             min_non_bomb_tiles -= 3;
-        
-        if(start_row === 0 || start_row === this.props.board_width - 1)
+
+        if (start_row === 0 || start_row === this.props.board_width - 1)
             min_non_bomb_tiles -= 2;
-        
+
         do {
             arr = arr2D.create(this.props.board_height, this.props.board_width, 0);
             arr = arr2D.populate(arr, constants.BOMB_VALUE, this.props.bomb_count);
@@ -44,7 +41,7 @@ export default class Board extends React.Component {
             || (this.non_bomb_tiles < min_non_bomb_tiles && arr[start_row][start_col] === constants.BOMB_VALUE)
         );
 
-        this.board_value = arr;
+        this.tile_value = arr;
 
         this.setState({ started: true }, () => {
             this.props.notifyGameStatus(constants.GAME_STATUS_START);
@@ -59,27 +56,28 @@ export default class Board extends React.Component {
         }
 
         // If flagged or clicked, do nothing
-        else if (this.state.board_flagged[row][col] || this.state.board_clicked[row][col]) {
+        else if (this.state.tile_state[row][col] === constants.TILE_STATE_FLAGGED
+            || this.state.tile_state[row][col] === constants.TILE_STATE_CLICKED) {
         }
 
         // If it's bomb, game over
-        else if (this.board_value[row][col] === constants.BOMB_VALUE) {
-            this.setState({ board_wrong_bomb: this.getId(row, col) });
+        else if (this.tile_value[row][col] === constants.BOMB_VALUE) {
+            this.setState({ tile_state: arr2D.update(this.state.tile_state, row, col, constants.TILE_STATE_RED_BOMB) });
             this.handleGameLose();
         }
 
 
         else {
             // Click the tile
-            this.setState({ board_clicked: arr2D.update(this.state.board_clicked, row, col, true) });
+            this.setState({ tile_state: arr2D.update(this.state.tile_state, row, col, constants.TILE_STATE_CLICKED) });
 
             // Check whether win
-            if (arr2D.getCount(this.state.board_clicked, true) === this.non_bomb_tiles) {
+            if (arr2D.getCount(this.state.tile_state, constants.TILE_STATE_CLICKED) === this.non_bomb_tiles) {
                 this.handleGameWin();
             }
 
             // If tile is zero, click adjacent non-bomb tiles
-            else if (this.board_value[row][col] === 0) {
+            else if (this.tile_value[row][col] === 0) {
                 this.clickNonBombAdj(row, col);
             }
         }
@@ -87,9 +85,15 @@ export default class Board extends React.Component {
 
     // Toggle flag on tile if not clicked
     flagTile = (row, col) => {
-        if (!this.state.board_clicked[row][col]) {
-            this.setState({ board_flagged: arr2D.toggle(this.state.board_flagged, row, col) });
-            this.props.notifyFlagChange(this.state.board_flagged[row][col]);
+        if (this.state.tile_state[row][col] !== constants.TILE_STATE_CLICKED) {
+            let x;
+            if (this.state.tile_state[row][col] === constants.TILE_STATE_FLAGGED)
+                x = constants.TILE_STATE_INIT;
+            else if (this.state.tile_state[row][col] === constants.TILE_STATE_INIT)
+                x = constants.TILE_STATE_FLAGGED;
+
+            this.setState({ tile_state: arr2D.update(this.state.tile_state, row, col, x) });
+            this.props.notifyFlagChange(x === constants.TILE_STATE_INIT ? false : true);
         }
     }
 
@@ -97,28 +101,28 @@ export default class Board extends React.Component {
         let id = this.getId(row, col);
         let arr = this.state.peek;
         if (active)
-            arr.push(id);    
+            arr.push(id);
         else
             arr = arrUtil.remove(arr, id);
-            
-        this.setState({peek: arr });
+
+        this.setState({ peek: arr });
         this.props.notifyTilePeek(active);
     }
 
     peekTileReset = () => {
-        this.setState({peek: []});
+        this.setState({ peek: [] });
         this.props.notifyTilePeek(false);
     }
 
     // If the tile's number equals surrounding flag count,
     // click the surrounding tiles
     HandleTileBothClick = (row, col) => {
-        let val = this.board_value[row][col];
+        let adjBombCount = this.tile_value[row][col];
 
-        if (val > 0 && this.state.board_clicked[row][col] === true) {
-            let flag_count = arr2D.getAdjCount(this.state.board_flagged, row, col, true);
-            if (flag_count === val) {
-                arr2D.callFnOnAdj(this.board_value, row, col, this.handleTileLeftClick);
+        if (adjBombCount > 0 && this.state.tile_state[row][col] === constants.TILE_STATE_CLICKED) {
+            let flag_count = arr2D.getAdjCount(this.state.tile_state, row, col, constants.TILE_STATE_FLAGGED);
+            if (flag_count === adjBombCount) {
+                arr2D.callFnOnAdj(this.tile_value, row, col, this.handleTileLeftClick);
             }
         }
     }
@@ -130,7 +134,7 @@ export default class Board extends React.Component {
                     this.peekTile(row, col, true);
                     break;
                 case constants.MOUSE_BOTH:
-                    arr2D.callFnOnAdj(this.board_value, row, col, (i, j) => {
+                    arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
                         this.peekTile(i, j, true);
                     });
                     break;
@@ -143,7 +147,7 @@ export default class Board extends React.Component {
                     this.peekTile(row, col, false);
                     break;
                 case constants.MOUSE_BOTH:
-                    arr2D.callFnOnAdj(this.board_value, row, col, (i, j) => {
+                    arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
                         this.peekTile(i, j, false);
                     });
                     break;
@@ -159,7 +163,7 @@ export default class Board extends React.Component {
                     this.peekTile(row, col, true);
                     break;
                 case constants.MOUSE_BOTH:
-                    arr2D.callFnOnAdj(this.board_value, row, col, (i, j) => {
+                    arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
                         this.peekTile(i, j, true);
                     });
                     break;
@@ -189,12 +193,12 @@ export default class Board extends React.Component {
 
     // Click adjacent tile if it's non-clicked, non-flagged, non-bomb
     clickNonBombAdj = (row, col) => {
-        arr2D.callFnOnAdj(this.board_value, row, col, (i, j) => {
+        arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
             if (i !== row || j !== col) {
                 if (
-                    !this.state.board_clicked[i][j]
-                    && !this.state.board_flagged[i][j]
-                    && this.board_value[i][j] !== constants.BOMB_VALUE
+                    this.state.tile_state[i][j] !== constants.TILE_STATE_CLICKED
+                    && !this.state.tile_state[i][j] !== constants.TILE_STATE_FLAGGED
+                    && this.tile_value[i][j] !== constants.BOMB_VALUE
                 ) {
                     this.handleTileLeftClick(i, j);
                 }
@@ -203,43 +207,34 @@ export default class Board extends React.Component {
     }
 
     handleGameLose = () => {
-        let arr_clicked = this.state.board_clicked;
-        let arr_wrong_flag = this.state.wrong_flag;
-
-        for (let row = 0; row < this.props.board_height; row++) {
-            for (let col = 0; col < this.props.board_width; col++) {
-                if (this.board_value[row][col] === constants.BOMB_VALUE) {
-                    // Click all the bombs
-                    arr_clicked[row][col] = true;
-                } else if (this.state.board_flagged[row][col] === true) {
-                    // Mark wrong flag
-                    arr_wrong_flag.push(this.getId(row, col));
+        let new_tile_state = arr2D.map(this.state.tile_state, (arr, i, j) => {
+            if (this.tile_value[i][j] === constants.BOMB_VALUE) {
+                if (arr[i][j] !== constants.TILE_STATE_RED_BOMB && arr[i][j] !== constants.TILE_STATE_FLAGGED) {
+                    arr[i][j] = constants.TILE_STATE_CLICKED;
                 }
             }
-        }
+            else if (arr[i][j] === constants.TILE_STATE_FLAGGED) {
+                arr[i][j] = constants.TILE_STATE_NO_BOMB;
+            }
+        });
 
         this.setState({
-            board_clicked: arr_clicked,
-            wrong_flag: arr_wrong_flag,
+            tile_state: new_tile_state,
             enabled: false
         });
         this.props.notifyGameStatus(constants.GAME_STATUS_LOSE);
     }
 
+    // Flag all bomb tiles
     handleGameWin = () => {
-        let arr = this.state.board_flagged;
-        let n = arr.length;
-
-        for (let i = 0; i < n; i++) {
-            for (let j = 0; j < arr[i].length; j++) {
-                if (this.board_value[i][j] === constants.BOMB_VALUE) {
-                    arr[i][j] = true;
-                }
+        let new_tile_state = arr2D.map(this.state.tile_state, (arr, i, j) => {
+            if (this.tile_value[i][j] === constants.BOMB_VALUE) {
+                arr[i][j] = constants.TILE_STATE_FLAGGED;
             }
-        }
+        });
 
         this.setState({
-            board_flagged: arr,
+            tile_state: new_tile_state,
             enabled: false
         });
         this.props.notifyGameStatus(constants.GAME_STATUS_WIN);
@@ -256,12 +251,9 @@ export default class Board extends React.Component {
                 let id = this.getId(row, col);
                 arr.push(<Tile
                     key={id}
-                    wrong_bomb={(id === this.state.board_wrong_bomb)}
-                    wrong_flag={this.state.wrong_flag.includes(id)}
                     peek={this.state.peek.includes(id)}
-                    value={this.board_value[row][col]}
-                    clicked={this.state.board_clicked[row][col]}
-                    flagged={this.state.board_flagged[row][col]}
+                    tile_value={this.tile_value[row][col]}
+                    tile_state={this.state.tile_state[row][col]}
                     notifyMouseEvent={this.state.enabled ? this.handleTileMouseEvent : null}
                     row={row}
                     col={col}
