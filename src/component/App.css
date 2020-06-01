@@ -1,19 +1,5 @@
-#app {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.centre {
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-h3 {
-  margin: 4px;
-  padding: 0;
-  text-align: center;
+.hide {
+  display: none;
 }
 
 #header {
