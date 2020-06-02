@@ -1,4 +1,8 @@
 module.exports = Object.freeze({
+    BOARD_WIDTH_MIN: 8, // For styling purpose
+    BOARD_WIDTH_MAX: 99,
+    BOARD_HEIGHT_MIN: 1,
+    BOARD_HEIGHT_MAX: 99,
     BOMB_VALUE: 11,
     TILE_HEIGHT: 16,
     TILE_STATE_PEEK: 0,
@@ -26,8 +30,8 @@ module.exports = Object.freeze({
     GAME_STATUS_WIN: 3,
     GAME_STATUS_LOSE: 4,
     DIGIT_HEIGHT: 23,
-    DIFFICULTY_EASY: 0,
-    DIFFICULTY_MEDIUM: 1,
-    DIFFICULTY_HARD: 2,
-    DIFFICULTY_CUSTOM: 3,
+    MODE_EASY: 0,
+    MODE_MEDIUM: 1,
+    MODE_HARD: 2,
+    MODE_CUSTOM: 3,
 });

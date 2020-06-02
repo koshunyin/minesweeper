@@ -1,5 +1,6 @@
+import { InputLabel, NativeSelect } from '@material-ui/core';
 import React from "react";
-import './Dropdown.css';
+const constants = require('../lib/constants');
 
 export default class Dropdown extends React.Component {
 
@@ -10,24 +11,28 @@ export default class Dropdown extends React.Component {
 
     render() {
         let arr = [];
-        let difficulty = ['Easy', 'Medium', 'Hard'];
-        for (let i = 0, n = difficulty.length; i < n; i++) {
+        let modes = ['Easy', 'Medium', 'Hard', 'Custom'];
+        for (let i = 0, n = modes.length; i < n; i++) {
             arr.push(
                 <option
                     key={i}
                     value={i}
-                >{difficulty[i]}</option>
+                    hidden={i === constants.MODE_CUSTOM}
+                >{modes[i]}</option>
             );
         }
 
         return (
-            <select
-                className='select-css'
-                value={this.props.difficulty}
-                onChange={this.handleChange}
-            >
-                {arr}
-            </select>
+            <div className='comp-select'>
+                <InputLabel htmlFor='select'>Mode</InputLabel>
+                    <NativeSelect
+                        id='select'
+                        value={this.props.mode}
+                        onChange={this.handleChange}
+                    >
+                        {arr}
+                    </NativeSelect>
+            </div>
         );
     }
 }
