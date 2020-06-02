@@ -88,7 +88,7 @@ export default class App extends React.Component {
       board_width: width,
       board_height: height,
       bomb_count: bombs,
-      mode: constants.MODE_HARD
+      mode: mode
     };
 
     this.restartGame();
@@ -184,6 +184,7 @@ export default class App extends React.Component {
           />
         </div>
       </div>
+
     );
   }
 }
