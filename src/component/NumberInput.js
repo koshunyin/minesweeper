@@ -21,7 +21,10 @@ export default class NumberInput extends React.Component {
     }
 
     handleChange = (e) => {
-        this.setState({ value: e.target.value });
+        var numberPattern = /\d+/g;
+        let val = e.target.value;
+        val = (val.match(numberPattern) || []).join('');
+        this.setState({ value: val });
     }
 
     render() {
