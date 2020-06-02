@@ -28,7 +28,7 @@ export default class Board extends React.Component {
         if (start_row === 0 || start_row === this.props.board_height - 1)
             min_non_bomb_tiles -= 3;
 
-        if (start_row === 0 || start_row === this.props.board_width - 1)
+        if (start_col === 0 || start_col === this.props.board_width - 1)
             min_non_bomb_tiles -= 2;
 
         do {
@@ -65,7 +65,6 @@ export default class Board extends React.Component {
             this.setState({ tile_state: arr2D.update(this.state.tile_state, row, col, constants.TILE_STATE_RED_BOMB) });
             this.handleGameLose();
         }
-
 
         else {
             // Click the tile
@@ -246,6 +245,7 @@ export default class Board extends React.Component {
 
     render() {
         let arr = [];
+
         for (let row = 0; row < this.props.board_height; row++) {
             for (let col = 0; col < this.props.board_width; col++) {
                 let id = this.getId(row, col);

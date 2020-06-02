@@ -1,5 +1,6 @@
 import { TextField, InputLabel } from '@material-ui/core';
 import React from "react";
+const regexUtil = require('../lib/regexUtil.js');
 
 export default class NumberInput extends React.Component {
 
@@ -9,22 +10,18 @@ export default class NumberInput extends React.Component {
     }
 
     handleLostFocus = (e) => {
-        var numberPattern = /\d+/g;
-        let val = e.target.value;
-        val = (val.match(numberPattern) || []).join('');
+        let val = regexUtil.getNumber(e.target.value);
         val = Math.max(val, this.props.min);
         val = Math.min(val, this.props.max);
         if (val !== this.props.value) {
             this.props.notifyChange(val);
-            this.setState({ value: val });
         }
+
+        this.setState({ value: val });
     }
 
     handleChange = (e) => {
-        var numberPattern = /\d+/g;
-        let val = e.target.value;
-        val = (val.match(numberPattern) || []).join('');
-        this.setState({ value: val });
+        this.setState({ value: regexUtil.getNumber(e.target.value) });
     }
 
     render() {
@@ -37,6 +34,7 @@ export default class NumberInput extends React.Component {
                     onChange={this.handleChange}
                     onBlur={this.handleLostFocus}
                     inputProps={{ style: { textAlign: 'center', width: '3em' } }}
+                    autoComplete='off'
                 ></TextField>
             </div>
         );

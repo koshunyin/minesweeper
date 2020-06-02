@@ -13,15 +13,18 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
 
+    this.settings = {
+      board_width: 30,
+      board_height: 16,
+      bomb_count: 99,
+      mode: constants.MODE_HARD
+    };
+
     this.state = {
       restart_count: 0,  // Note: change this  will force restasrt
       flag_count: 0,
       time: 0,
       button_status: constants.BUTTON_INIT,
-      board_width: 30,
-      board_height: 16,
-      bomb_count: 99,
-      mode: constants.MODE_HARD
     };
   }
 
@@ -65,35 +68,37 @@ export default class App extends React.Component {
     this.setState({ flag_count: this.state.flag_count + (flagged ? 1 : -1) });
   }
 
-  handleDropdownChange = (my_mode) => {
-    let my_width, my_height, my_bombs;
+  handleDropdownChange = (mode) => {
+    let width, height, bombs;
 
-    switch (my_mode) {
+    switch (mode) {
       case constants.MODE_EASY:
-        my_width = 9; my_height = 9; my_bombs = 10;
+        width = 9; height = 9; bombs = 10;
         break;
       case constants.MODE_MEDIUM:
-        my_width = 16; my_height = 16; my_bombs = 40;
+        width = 16; height = 16; bombs = 40;
         break;
       case constants.MODE_HARD:
-        my_width = 30; my_height = 16; my_bombs = 99;
+        width = 30; height = 16; bombs = 99;
         break;
       default: // Do Nothing
     }
 
-    this.setState({
-      board_width: my_width,
-      board_height: my_height,
-      bomb_count: my_bombs,
-      mode: my_mode
-    });
+    this.settings = {
+      board_width: width,
+      board_height: height,
+      bomb_count: bombs,
+      mode: constants.MODE_HARD
+    };
 
     this.restartGame();
   }
 
   handleNumberInputChange = (obj) => {
-    this.setState(obj);
-    this.setState({mode: constants.MODE_CUSTOM});
+    let key = Object.keys(obj)[0];
+    this.settings[key] = obj[key];
+    this.settings.bomb_count = Math.min(this.settings.bomb_count, this.settings.board_width * this.settings.board_height - 1);
+    this.settings.mode = constants.MODE_CUSTOM;
     this.restartGame();
   }
 
@@ -115,7 +120,7 @@ export default class App extends React.Component {
             <Box ml={1}>
               <Dropdown
                 key={this.state.restart_count}
-                mode={this.state.mode}
+                mode={this.settings.mode}
                 notifyChange={this.handleDropdownChange}
               ></Dropdown>
             </Box>
@@ -124,10 +129,10 @@ export default class App extends React.Component {
               <NumberInput
                 key={this.state.restart_count}
                 name='Width'
-                value={this.state.board_width}
+                value={this.settings.board_width}
                 min={constants.BOARD_WIDTH_MIN}
                 max={constants.BOARD_WIDTH_MAX}
-                notifyChange={(val) => { this.handleNumberInputChange({board_width: val})}}
+                notifyChange={(val) => { this.handleNumberInputChange({ board_width: val }) }}
               ></NumberInput>
             </Box>
 
@@ -135,10 +140,10 @@ export default class App extends React.Component {
               <NumberInput
                 key={this.state.restart_count}
                 name='Height'
-                value={this.state.board_height}
+                value={this.settings.board_height}
                 min={constants.BOARD_HEIGHT_MIN}
                 max={constants.BOARD_HEIGHT_MAX}
-                notifyChange={(val) => { this.handleNumberInputChange({board_height: val})}}
+                notifyChange={(val) => { this.handleNumberInputChange({ board_height: val }) }}
               ></NumberInput>
             </Box>
 
@@ -146,21 +151,21 @@ export default class App extends React.Component {
               <NumberInput
                 key={this.state.restart_count}
                 name='Bombs'
-                value={this.state.bomb_count}
+                value={this.settings.bomb_count}
                 min={1}
-                max={this.state.board_width * this.state.board_height - 1} // Allow one non-bomb tile
-                notifyChange={(val) => { this.handleNumberInputChange({bomb_count: val})}}
+                max={this.settings.board_width * this.settings.board_height - 1} // Allow one non-bomb tile
+                notifyChange={(val) => { this.handleNumberInputChange({ bomb_count: val }) }}
               ></NumberInput>
             </Box>
           </Grid>
         </Box>
 
         <div
-          style={{ width: this.state.board_width * constants.TILE_HEIGHT, height: this.state.board_height * constants.TILE_HEIGHT }}
+          style={{ width: this.settings.board_width * constants.TILE_HEIGHT, height: this.settings.board_height * constants.TILE_HEIGHT }}
           onContextMenu={(e) => { e.preventDefault() }}
         >
           <div id='header'>
-            <Counter value={this.state.bomb_count - this.state.flag_count} />
+            <Counter value={this.settings.bomb_count - this.state.flag_count} />
             <Button
               notifyClick={this.handleSmileyClick}
               status={this.state.button_status}
@@ -170,9 +175,9 @@ export default class App extends React.Component {
 
           <Board
             key={this.state.restart_count}
-            board_width={this.state.board_width}
-            board_height={this.state.board_height}
-            bomb_count={this.state.bomb_count}
+            board_width={this.settings.board_width}
+            board_height={this.settings.board_height}
+            bomb_count={this.settings.bomb_count}
             notifyFlagChange={this.handleFlagChange}
             notifyGameStatus={this.handleGameStatus}
             notifyTilePeek={this.handleTilePeek}
