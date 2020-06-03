@@ -6,14 +6,17 @@ export default class Tile extends React.Component {
     constructor(props) {
         super(props);
         this.timer = null;
+        this.touch = false;
     }
 
     handleMouseEvent = (e, mouse_event) => {
-        if (this.props.notifyMouseEvent)
+        if (!this.touch && this.props.notifyMouseEvent)
             this.props.notifyMouseEvent(this.props.row, this.props.col, e.buttons, mouse_event, e.ctrlKey);
     }
 
-    handleTouchStart = () => {
+    handleTouchStart = (e) => {
+        this.touch = true; // Workaround to prevent mouse event
+
         this.timer = setTimeout(() => {
             if (this.props.notifyLongTouchEvent)
                 this.props.notifyLongTouchEvent(this.props.row, this.props.col);
@@ -22,6 +25,7 @@ export default class Tile extends React.Component {
 
     handleTouchEnd = (e) => {
         clearTimeout(this.timer);
+        this.props.notifyTouchEvent(this.props.row, this.props.col);
     }
 
     render() {

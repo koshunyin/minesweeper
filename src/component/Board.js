@@ -31,7 +31,16 @@ export default class Board extends React.Component {
         });
     }
 
-    handleTileTouchLongEvent = (row, col) => {
+    handleTileTouchEvent = (row, col) => {
+        if (this.state.tile_state[row][col] === constants.TILE_STATE_CLICKED) {
+            this.HandleTileBothClick(row, col);
+        }
+        else {
+            this.handleTileLeftClick(row, col);
+        }
+    }
+
+    handleTileLongTouchEvent = (row, col) => {
         this.flagTile(row, col);
     }
 
@@ -63,7 +72,7 @@ export default class Board extends React.Component {
 
             // If tile is zero, click adjacent non-bomb tiles
             else if (this.tile_value[row][col] === 0) {
-                this.setState({tile_state: minesweeper.OpenNonBombAdj(this.tile_value, this.state.tile_state, row, col, constants.BOMB_VALUE, constants.TILE_STATE_FLAGGED, constants.TILE_STATE_CLICKED)});
+                this.setState({ tile_state: minesweeper.OpenNonBombAdj(this.tile_value, this.state.tile_state, row, col, constants.BOMB_VALUE, constants.TILE_STATE_FLAGGED, constants.TILE_STATE_CLICKED) });
             }
         }
     }
@@ -234,7 +243,8 @@ export default class Board extends React.Component {
                     tile_value={this.tile_value[row][col]}
                     tile_state={this.state.tile_state[row][col]}
                     notifyMouseEvent={this.state.enabled ? this.handleTileMouseEvent : null}
-                    notifyLongTouchEvent={this.state.enabled ? this.handleTileTouchLongEvent : null}
+                    notifyTouchEvent={this.state.enabled ? this.handleTileTouchEvent : null}
+                    notifyLongTouchEvent={this.state.enabled ? this.handleTileLongTouchEvent : null}
                     row={row}
                     col={col}
                 ></Tile>
