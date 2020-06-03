@@ -182,14 +182,14 @@ export default class App extends React.Component {
             notifyGameStatus={this.handleGameStatus}
             notifyTilePeek={this.handleTilePeek}
           />
-          <footer>
-            <p>
-              Samuel Ko | <a href="mailto:koshunyin@gmail.com">
-                <i class="fa fa-envelope"></i>
-              </a>
-            </p>
-          </footer>
         </div>
+        <footer>
+          <p>
+            Samuel Ko | <a href="mailto:koshunyin@gmail.com">
+              <i className="fa fa-envelope"></i>
+            </a>
+          </p>
+        </footer>
       </div>
 
     );
