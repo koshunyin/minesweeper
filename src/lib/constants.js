@@ -28,6 +28,7 @@ module.exports = Object.freeze({
     MOUSE_LEAVE: 204,
     MOUSE_CLICK: 205,
     KEYBOARD_F2: 113,
+    LONG_TOUCH_DURATION: 500,
     GAME_STATUS_START: 0,
     GAME_STATUS_WIN: 3,
     GAME_STATUS_LOSE: 4,

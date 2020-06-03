@@ -31,6 +31,10 @@ export default class Board extends React.Component {
         });
     }
 
+    handleTileTouchLongEvent = (row, col) => {
+        this.flagTile(row, col);
+    }
+
     handleTileLeftClick = (row, col) => {
         // If not yet started, populate board
         if (!this.state.started) {
@@ -230,6 +234,7 @@ export default class Board extends React.Component {
                     tile_value={this.tile_value[row][col]}
                     tile_state={this.state.tile_state[row][col]}
                     notifyMouseEvent={this.state.enabled ? this.handleTileMouseEvent : null}
+                    notifyLongTouchEvent={this.state.enabled ? this.handleTileTouchLongEvent : null}
                     row={row}
                     col={col}
                 ></Tile>

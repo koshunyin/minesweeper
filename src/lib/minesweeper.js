@@ -76,7 +76,7 @@ exports.OpenNonBombAdj = (arr_val, arr_state, row, col, bomb_val, flagged_state,
                     if (
                         (i !== x.row || j !== x.col)
                         && arr_state[i][j] !== clicked_state
-                        && !arr_state[i][j] !== flagged_state
+                        && arr_state[i][j] !== flagged_state
                         && arr_val[i][j] !== bomb_val
                     ) {
                         temp.push({ row: i, col: j });
