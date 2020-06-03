@@ -172,21 +172,6 @@ export default class Board extends React.Component {
         }
     }
 
-    // Click adjacent tile if it's non-clicked, non-flagged, non-bomb
-    clickNonBombAdj = (row, col) => {
-        arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
-            if (i !== row || j !== col) {
-                if (
-                    this.state.tile_state[i][j] !== constants.TILE_STATE_CLICKED
-                    && !this.state.tile_state[i][j] !== constants.TILE_STATE_FLAGGED
-                    && this.tile_value[i][j] !== constants.BOMB_VALUE
-                ) {
-                    this.handleTileLeftClick(i, j);
-                }
-            }
-        })
-    }
-
     handleGameLose = () => {
         let new_tile_state = arr2D.map(this.state.tile_state, (arr, i, j) => {
             if (this.tile_value[i][j] === constants.BOMB_VALUE) {

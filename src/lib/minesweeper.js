@@ -64,14 +64,7 @@ exports.OpenNonBombAdj = (arr_val, arr_state, row, col, bomb_val, flagged_state,
     while (temp.length !== 0) {
         let x = temp.pop();
 
-        if (
-            arr_state[x.row][x.col] !== clicked_state
-            && !arr_state[x.row][x.col] !== flagged_state
-            && arr_val[x.row][x.col] !== bomb_val
-        ) {
-            arr_state[x.row][x.col] = clicked_state;
-        }
-
+        arr_state[x.row][x.col] = clicked_state;
         if (arr_val[x.row][x.col] === 0) {
             let row_min = Math.max(x.row - 1, 0);
             let row_max = Math.min(x.row + 1, rows - 1);
