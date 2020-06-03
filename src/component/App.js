@@ -28,6 +28,11 @@ export default class App extends React.Component {
     };
   }
 
+  handleKeyDown = (e) => {
+    if (e.keyCode === constants.KEYBOARD_F2)
+      this.restartGame();
+  }
+
   handleSmileyClick = () => {
     this.restartGame();
   }
@@ -104,7 +109,12 @@ export default class App extends React.Component {
 
   render() {
     return (
-      <div id='app' className='noselect'>
+      <div
+        id='app'
+        className='noselect'
+        onKeyDown={this.handleKeyDown}
+        tabIndex={0}
+      >
         <h1 className='hide'>MineSweeper</h1>
         <h2 className='hide'>MineSweeper made from ReactJS</h2>
         <h3 className='hide'>Enjoy the classic MineSweeper</h3>
@@ -187,6 +197,8 @@ export default class App extends React.Component {
           <p>
             Samuel Ko | <a href="mailto:koshunyin@gmail.com">
               <i className="fa fa-envelope"></i>
+            </a> | <a target="_blank" rel="noopener noreferrer" href="https://github.com/koshunyin/minesweeper">
+            <i className="fa fa-github"></i>
             </a>
           </p>
         </footer>

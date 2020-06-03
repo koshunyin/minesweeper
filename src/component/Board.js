@@ -108,13 +108,14 @@ export default class Board extends React.Component {
         }
     }
 
-    handleTileMouseEvent = (row, col, mouse_button, mouse_event) => {
+    handleTileMouseEvent = (row, col, mouse_button, mouse_event, ctrl) => {
         if (mouse_event === constants.MOUSE_ENTER) {
             switch (mouse_button) {
                 case constants.MOUSE_LEFT:
                     this.peekTile(row, col, true);
                     break;
                 case constants.MOUSE_BOTH:
+                case constants.MOUSE_MIDDLE:
                     arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
                         this.peekTile(i, j, true);
                     });
@@ -128,6 +129,7 @@ export default class Board extends React.Component {
                     this.peekTile(row, col, false);
                     break;
                 case constants.MOUSE_BOTH:
+                case constants.MOUSE_MIDDLE:
                     arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
                         this.peekTile(i, j, false);
                     });
@@ -141,12 +143,17 @@ export default class Board extends React.Component {
                     this.flagTile(row, col);
                     break;
                 case constants.MOUSE_LEFT:
-                    this.peekTile(row, col, true);
+                    if (ctrl)
+                        this.flagTile(row, col);
+                    else
+                        this.peekTile(row, col, true);
                     break;
                 case constants.MOUSE_BOTH:
-                    arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
-                        this.peekTile(i, j, true);
-                    });
+                case constants.MOUSE_MIDDLE:
+                    if (!ctrl)
+                        arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
+                            this.peekTile(i, j, true);
+                        });
                     break;
                 default: // Do Nothing
             }
@@ -162,6 +169,7 @@ export default class Board extends React.Component {
                     this.handleTileLeftClick(row, col);
                     break;
                 case constants.MOUSE_BOTH:
+                case constants.MOUSE_MIDDLE:
                     this.HandleTileBothClick(row, col);
                     break;
                 default: // Do Nothing

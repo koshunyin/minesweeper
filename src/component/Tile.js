@@ -6,7 +6,7 @@ export default class Tile extends React.Component {
 
     handleMouseEvent = (e, mouse_event) => {
         if (this.props.notifyMouseEvent)
-            this.props.notifyMouseEvent(this.props.row, this.props.col, e.buttons, mouse_event);
+            this.props.notifyMouseEvent(this.props.row, this.props.col, e.buttons, mouse_event, e.ctrlKey);
     }
 
     render() {
