@@ -1,4 +1,4 @@
-export function remove(arr, val) {
+exports.remove = (arr, val) => {
     var i = 0;
     while (i < arr.length) {
         if(arr[i] === val)

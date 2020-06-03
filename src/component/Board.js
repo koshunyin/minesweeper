@@ -4,12 +4,13 @@ import './Board.css';
 const arr2D = require('../lib/arr2D');
 const arrUtil = require('../lib/arrUtil');
 const constants = require('../lib/constants');
+const minesweeper = require('../lib/minesweeper');
 
 export default class Board extends React.Component {
     constructor(props) {
         super(props);
 
-        this.tile_value = arr2D.create(this.props.board_height, this.props.board_width, 0);
+        this.tile_value = arr2D.create(this.props.board_height, this.props.board_width, 0); // Empty board
         this.non_bomb_tiles = this.props.board_width * this.props.board_height - this.props.bomb_count;
         this.state = {
             enabled: true,
@@ -22,26 +23,7 @@ export default class Board extends React.Component {
 
     // Make sure blank tile for first click (or non-bomb tile if too many bombs)
     populateBoard = (start_row, start_col) => {
-        let arr;
-        let min_non_bomb_tiles = 9;
-
-        if (start_row === 0 || start_row === this.props.board_height - 1)
-            min_non_bomb_tiles -= 3;
-
-        if (start_col === 0 || start_col === this.props.board_width - 1)
-            min_non_bomb_tiles -= 2;
-
-        do {
-            arr = arr2D.create(this.props.board_height, this.props.board_width, 0);
-            arr = arr2D.populate(arr, constants.BOMB_VALUE, this.props.bomb_count);
-            arr = arr2D.fillAdjCount(arr, constants.BOMB_VALUE);
-        } while
-            (
-            (this.non_bomb_tiles >= min_non_bomb_tiles && arr[start_row][start_col] !== 0)
-            || (this.non_bomb_tiles < min_non_bomb_tiles && arr[start_row][start_col] === constants.BOMB_VALUE)
-        );
-
-        this.tile_value = arr;
+        this.tile_value = minesweeper.createBoard(this.props.board_height, this.props.board_width, this.props.bomb_count, start_row, start_col, constants.BOMB_VALUE);
 
         this.setState({ started: true }, () => {
             this.props.notifyGameStatus(constants.GAME_STATUS_START);
@@ -77,7 +59,7 @@ export default class Board extends React.Component {
 
             // If tile is zero, click adjacent non-bomb tiles
             else if (this.tile_value[row][col] === 0) {
-                this.clickNonBombAdj(row, col);
+                this.setState({tile_state: minesweeper.OpenNonBombAdj(this.tile_value, this.state.tile_state, row, col, constants.BOMB_VALUE, constants.TILE_STATE_FLAGGED, constants.TILE_STATE_CLICKED)});
             }
         }
     }

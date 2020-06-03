@@ -1,5 +1,5 @@
 // Create 2D array with prefilled values
-export function create(rows, cols, prefill_val) {
+exports.create = (rows, cols, prefill_val) => {
   let arr = Array(rows);
   for (let i = 0; i < rows; i++) {
     arr[i] = Array(cols).fill(prefill_val);;
@@ -8,26 +8,41 @@ export function create(rows, cols, prefill_val) {
   return arr;
 }
 
-// Assign val to {n} cells
-export function populate(arr, val, n) {
+// Assign val to {n} cells of the array in place
+exports.populate = (arr, val, n) => {
   let rows = arr.length;
   let cols = arr[0].length;
-  let i = n;
+  let count = n;
 
-  while (i !== 0) {
-    let row = Math.floor(Math.random() * rows);
-    let col = Math.floor(Math.random() * cols);
-    if (arr[row][col] !== val) {
-      arr[row][col] = val;
-      i--;
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      arr[i][j] = val;
+      count--;
+
+      if (count === 0)
+        return;
     }
   }
+}
 
-  return arr;
+// Randomise the array in place
+exports.shuffle = (arr) => {
+  let rows = arr.length;
+  let cols = arr[0].length;
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      let x = Math.floor(Math.random() * rows);
+      let y = Math.floor(Math.random() * cols);
+      let temp = arr[i][j];
+      arr[i][j] = arr[x][y];
+      arr[x][y] = temp;
+    }
+  }
 }
 
 // Fill array with adjacent count of val
-export function fillAdjCount(arr, val) {
+exports.fillAdjCount = (arr, val) => {
   for (let row = 0; row < arr.length; row++) {
     for (let col = 0; col < arr[0].length; col++) {
       if (arr[row][col] === val) {
@@ -39,12 +54,10 @@ export function fillAdjCount(arr, val) {
       }
     }
   }
-
-  return arr;
 }
 
 // Get adjacent count of val for arr[row][col]
-export function getAdjCount(arr, row, col, val) {
+exports.getAdjCount = (arr, row, col, val) => {
   let count = 0;
   this.callFnOnAdj(arr, row, col, (i, j) => {
     if (arr[i][j] === val) {
@@ -56,7 +69,7 @@ export function getAdjCount(arr, row, col, val) {
 }
 
 // Execute function on arr[row][col] and its adjacent cells
-export function callFnOnAdj(arr, row, col, fn) {
+exports.callFnOnAdj = (arr, row, col, fn) => {
   let rows = arr.length;
   let cols = arr[0].length;
 
@@ -73,30 +86,26 @@ export function callFnOnAdj(arr, row, col, fn) {
 }
 
 // Update arr[row][col] with val
-export function update(arr, row, col, val) {
+exports.update = (arr, row, col, val) => {
   arr[row][col] = val;
   return arr;
 }
 
 // Get count of val in arr
-export function getCount(arr, val) {
+exports.getCount = (arr, val) => {
   let count = 0;
 
-  arr.forEach((row) => {row.forEach((cell) => {
-    count += (cell === val ? 1 : 0);
-  })})
+  arr.forEach((row) => {
+    row.forEach((cell) => {
+      count += (cell === val ? 1 : 0);
+    })
+  })
 
-  return count;  
-}
-
-// Toggle boolean value on arr[row][col]
-export function toggle(arr, row, col){
-  arr[row][col] = !arr[row][col];
-  return arr;
+  return count;
 }
 
 // Call function on each cell in 2D array
-export function map(arr, fn){
+exports.map = (arr, fn) => {
   let rows = arr.length;
   let cols = arr[0].length;
 
