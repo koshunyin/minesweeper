@@ -21,7 +21,7 @@ export default class App extends React.Component {
     };
 
     this.state = {
-      restart_count: 0,  // Note: change this  will force restasrt
+      restart_count: 0,  // Note: change this will force restasrt
       flag_count: 0,
       time: 0,
       button_status: constants.BUTTON_INIT,

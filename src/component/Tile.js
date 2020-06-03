@@ -7,25 +7,35 @@ export default class Tile extends React.Component {
         super(props);
         this.timer = null;
         this.touch = false;
+        this.touch_start_time = 0;
     }
 
     handleMouseEvent = (e, mouse_event) => {
-        if (!this.touch && this.props.notifyMouseEvent)
+        if (!this.touch && this.props.notifyMouseEvent) {
             this.props.notifyMouseEvent(this.props.row, this.props.col, e.buttons, mouse_event, e.ctrlKey);
+            this.touch = false;
+        }
     }
 
     handleTouchStart = (e) => {
         this.touch = true; // Workaround to prevent mouse event
 
+        // Set timer for touch event
         this.timer = setTimeout(() => {
             if (this.props.notifyLongTouchEvent)
                 this.props.notifyLongTouchEvent(this.props.row, this.props.col);
         }, constants.LONG_TOUCH_DURATION);
+        this.touch_start_time = new Date();
     }
 
     handleTouchEnd = (e) => {
+        // If short touch, halt the long touch event
         clearTimeout(this.timer);
-        this.props.notifyTouchEvent(this.props.row, this.props.col);
+
+        // If short touch, call touch event
+        // (Long touch has been handled by timer)
+        if (((new Date()).getTime() - this.touch_start_time.getTime()) < constants.LONG_TOUCH_DURATION )
+            this.props.notifyTouchEvent(this.props.row, this.props.col);
     }
 
     render() {
@@ -40,7 +50,7 @@ export default class Tile extends React.Component {
                 offset = this.props.tile_state;
                 break;
             default:
-                if (this.props.peek) { offset = constants.TILE_STATE_PEEK; }
+                if (this.props.peek) { offset = constants.TILE_STATE_CLICKED; }
                 else { offset = constants.TILE_STATE_INIT; }
         }
 
