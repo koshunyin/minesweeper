@@ -166,9 +166,7 @@ export default class Board extends React.Component {
                 case constants.MOUSE_BOTH:
                 case constants.MOUSE_MIDDLE:
                     if (!ctrl)
-                        arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
-                            this.peekTile(i, j, true);
-                        });
+                        this.peekTileAdj(row, col, true);
                     break;
                 default: // Do Nothing
             }
@@ -229,18 +227,13 @@ export default class Board extends React.Component {
         this.props.notifyGameStatus(constants.GAME_STATUS_WIN);
     }
 
-    getId = (row, col) => {
-        return col + '_' + row;
-    }
-
     render() {
         let arr = [];
 
         for (let row = 0; row < this.props.board_height; row++) {
             for (let col = 0; col < this.props.board_width; col++) {
-                let id = this.getId(row, col);
                 arr.push(<Tile
-                    key={id}
+                    key={col + '_' + row}
                     peek={this.state.peek[row][col]}
                     tile_value={this.tile_value[row][col]}
                     tile_state={this.state.tile_state[row][col]}
