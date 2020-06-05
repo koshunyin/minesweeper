@@ -2,7 +2,7 @@ import React from "react";
 import './Tile.css';
 const constants = require('../lib/constants');
 
-export default class Tile extends React.Component {
+export default class Tile extends React.PureComponent {
     constructor(props) {
         super(props);
         this.timer = null;
