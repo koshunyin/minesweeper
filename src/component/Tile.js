@@ -11,6 +11,7 @@ export default class Tile extends React.Component {
     }
 
     handleMouseEvent = (e, mouse_event) => {
+        e.preventDefault();
         if (!this.touch && this.props.notifyMouseEvent) {
             this.props.notifyMouseEvent(this.props.row, this.props.col, e.buttons, mouse_event, e.ctrlKey);
             this.touch = false;
