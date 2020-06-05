@@ -10,33 +10,27 @@ export default class Board extends React.Component {
         super(props);
 
         this.tile_value = arr2D.create(this.props.board_height, this.props.board_width, 0);
+        this.tile_state = arr2D.create(this.props.board_height, this.props.board_width, constants.TILE_STATE_INIT);
+        this.peek_state = arr2D.create(this.props.board_height, this.props.board_width, false)
         this.non_bomb_tiles = this.props.board_width * this.props.board_height - this.props.bomb_count;
-        this.state = {
-            enabled: true,
-            started: false,
-            mouse_button: 0,
-            peek: arr2D.create(this.props.board_height, this.props.board_width, false),
-            tile_state: arr2D.create(this.props.board_height, this.props.board_width, constants.TILE_STATE_INIT)
-        };
+        this.mouse_button = 0;
+        this.enabled = true;
+        this.started = false;
     }
 
     // Make sure blank tile for first click (or non-bomb tile if too many bombs)
     populateBoard = (start_row, start_col) => {
+        this.started = true;
         this.tile_value = minesweeper.createBoard(this.props.board_height, this.props.board_width, this.props.bomb_count, start_row, start_col, constants.BOMB_VALUE);
-
-        this.setState({ started: true }, () => {
-            this.props.notifyGameStatus(constants.GAME_STATUS_START);
-            this.handleTileLeftClick(start_row, start_col);
-        });
+        this.props.notifyGameStatus(constants.GAME_STATUS_START);
+        this.handleTileLeftClick(start_row, start_col);
     }
 
     handleTileTouchEvent = (row, col) => {
-        if (this.state.tile_state[row][col] === constants.TILE_STATE_CLICKED) {
+        if (this.tile_state[row][col] === constants.TILE_STATE_CLICKED)
             this.HandleTileBothClick(row, col);
-        }
-        else {
+        else
             this.handleTileLeftClick(row, col);
-        }
     }
 
     handleTileLongTouchEvent = (row, col) => {
@@ -45,72 +39,69 @@ export default class Board extends React.Component {
 
     handleTileLeftClick = (row, col) => {
         // If not yet started, populate board
-        if (!this.state.started) {
+        if (!this.started) {
             this.populateBoard(row, col);
         }
 
         // If flagged or clicked, do nothing
-        else if (this.state.tile_state[row][col] === constants.TILE_STATE_FLAGGED
-            || this.state.tile_state[row][col] === constants.TILE_STATE_CLICKED) {
+        else if (this.tile_state[row][col] === constants.TILE_STATE_FLAGGED
+            || this.tile_state[row][col] === constants.TILE_STATE_CLICKED) {
         }
 
         // If it's bomb, game over
         else if (this.tile_value[row][col] === constants.BOMB_VALUE) {
-            this.setState({ tile_state: arr2D.update(this.state.tile_state, row, col, constants.TILE_STATE_RED_BOMB) });
+            this.tile_state[row][col] = constants.TILE_STATE_RED_BOMB;
             this.handleGameLose();
         }
 
         else {
             // Click the tile
-            this.setState({ tile_state: arr2D.update(this.state.tile_state, row, col, constants.TILE_STATE_CLICKED) });
+            this.tile_state[row][col] = constants.TILE_STATE_CLICKED;
 
             // Check whether win
-            if (arr2D.getCount(this.state.tile_state, constants.TILE_STATE_CLICKED) === this.non_bomb_tiles) {
+            if (arr2D.getCount(this.tile_state, constants.TILE_STATE_CLICKED) === this.non_bomb_tiles) {
                 this.handleGameWin();
             }
 
             // If tile is zero, click adjacent non-bomb tiles
             else if (this.tile_value[row][col] === 0) {
-                this.setState({ tile_state: minesweeper.OpenNonBombAdj(this.tile_value, this.state.tile_state, row, col, constants.BOMB_VALUE, constants.TILE_STATE_FLAGGED, constants.TILE_STATE_CLICKED) });
+                this.tile_state = minesweeper.OpenNonBombAdj(this.tile_value, this.tile_state, row, col, constants.BOMB_VALUE, constants.TILE_STATE_FLAGGED, constants.TILE_STATE_CLICKED);
             }
         }
     }
 
     // Toggle flag on tile if not clicked
     flagTile = (row, col) => {
-        if (this.state.tile_state[row][col] !== constants.TILE_STATE_CLICKED) {
-            let x;
-            if (this.state.tile_state[row][col] === constants.TILE_STATE_FLAGGED)
-                x = constants.TILE_STATE_INIT;
-            else if (this.state.tile_state[row][col] === constants.TILE_STATE_INIT)
-                x = constants.TILE_STATE_FLAGGED;
-
-            this.setState({ tile_state: arr2D.update(this.state.tile_state, row, col, x) });
-            this.props.notifyFlagChange(x === constants.TILE_STATE_INIT ? false : true);
+        if (this.tile_state[row][col] !== constants.TILE_STATE_CLICKED) {
+            if (this.tile_state[row][col] === constants.TILE_STATE_FLAGGED) {
+                this.tile_state[row][col] = constants.TILE_STATE_INIT;
+                this.props.notifyFlagChange(false);
+            }
+            else if (this.tile_state[row][col] === constants.TILE_STATE_INIT) {
+                this.tile_state[row][col] = constants.TILE_STATE_FLAGGED;
+                this.props.notifyFlagChange(true);
+            }
         }
     }
 
     // Peek 1 tile
     peekTile = (row, col, active) => {
-        this.setState({ peek: arr2D.update(this.state.peek, row, col, active) });
+        this.peek_state[row][col] = active;
         this.props.notifyTilePeek(active);
     }
 
     // Peek 9 tiles
     peekTileAdj = (row, col, active) => {
-        let arr = this.state.peek;
-
-        arr2D.callFnOnAdj(arr, row, col, (i, j) => {
-            arr[i][j] = active;
+        arr2D.callFnOnAdj(this.peek_state, row, col, (i, j) => {
+            this.peek_state[i][j] = active;
         });
 
-        this.setState({ peek: arr });
         this.props.notifyTilePeek(active);
     }
 
     // Quit peek mode
     peekTileReset = () => {
-        this.setState({ peek: arr2D.create(this.props.board_height, this.props.board_width, false) });
+        this.peek_state = arr2D.create(this.props.board_height, this.props.board_width, false);
         this.props.notifyTilePeek(false);
     }
 
@@ -119,8 +110,8 @@ export default class Board extends React.Component {
     HandleTileBothClick = (row, col) => {
         let adjBombCount = this.tile_value[row][col];
 
-        if (adjBombCount > 0 && this.state.tile_state[row][col] === constants.TILE_STATE_CLICKED) {
-            let flag_count = arr2D.getAdjCount(this.state.tile_state, row, col, constants.TILE_STATE_FLAGGED);
+        if (adjBombCount > 0 && this.tile_state[row][col] === constants.TILE_STATE_CLICKED) {
+            let flag_count = arr2D.getAdjCount(this.tile_state, row, col, constants.TILE_STATE_FLAGGED);
             if (flag_count === adjBombCount) {
                 arr2D.callFnOnAdj(this.tile_value, row, col, this.handleTileLeftClick);
             }
@@ -171,13 +162,13 @@ export default class Board extends React.Component {
                 default: // Do Nothing
             }
 
-            this.setState({ mouse_button: mouse_button });
+            this.mouse_button = mouse_button;
         }
         else if (mouse_event === constants.MOUSE_UP) {
             this.peekTileReset();
 
             // Note: Mouse up's event_buttons is undefined
-            switch (this.state.mouse_button) {
+            switch (this.mouse_button) {
                 case constants.MOUSE_LEFT:
                     this.handleTileLeftClick(row, col);
                     break;
@@ -189,12 +180,12 @@ export default class Board extends React.Component {
             }
 
             // Reset mouse button
-            this.setState({ mouse_button: 0 });
+            this.mouse_button = 0;
         }
     }
 
     handleGameLose = () => {
-        let new_tile_state = arr2D.map(this.state.tile_state, (arr, i, j) => {
+        this.tile_state = arr2D.map(this.tile_state, (arr, i, j) => {
             if (this.tile_value[i][j] === constants.BOMB_VALUE) {
                 if (arr[i][j] !== constants.TILE_STATE_RED_BOMB && arr[i][j] !== constants.TILE_STATE_FLAGGED) {
                     arr[i][j] = constants.TILE_STATE_CLICKED;
@@ -205,25 +196,19 @@ export default class Board extends React.Component {
             }
         });
 
-        this.setState({
-            tile_state: new_tile_state,
-            enabled: false
-        });
+        this.enabled = false;
         this.props.notifyGameStatus(constants.GAME_STATUS_LOSE);
     }
 
     // Flag all bomb tiles
     handleGameWin = () => {
-        let new_tile_state = arr2D.map(this.state.tile_state, (arr, i, j) => {
+        this.tile_state = arr2D.map(this.tile_state, (arr, i, j) => {
             if (this.tile_value[i][j] === constants.BOMB_VALUE) {
                 arr[i][j] = constants.TILE_STATE_FLAGGED;
             }
         });
 
-        this.setState({
-            tile_state: new_tile_state,
-            enabled: false
-        });
+        this.enabled = false;
         this.props.notifyGameStatus(constants.GAME_STATUS_WIN);
     }
 
@@ -234,12 +219,12 @@ export default class Board extends React.Component {
             for (let col = 0; col < this.props.board_width; col++) {
                 arr.push(<Tile
                     key={col + '_' + row}
-                    peek={this.state.peek[row][col]}
+                    peek={this.peek_state[row][col]}
                     tile_value={this.tile_value[row][col]}
-                    tile_state={this.state.tile_state[row][col]}
-                    notifyMouseEvent={this.state.enabled ? this.handleTileMouseEvent : null}
-                    notifyTouchEvent={this.state.enabled ? this.handleTileTouchEvent : null}
-                    notifyLongTouchEvent={this.state.enabled ? this.handleTileLongTouchEvent : null}
+                    tile_state={this.tile_state[row][col]}
+                    notifyMouseEvent={this.enabled ? this.handleTileMouseEvent : null}
+                    notifyTouchEvent={this.enabled ? this.handleTileTouchEvent : null}
+                    notifyLongTouchEvent={this.enabled ? this.handleTileLongTouchEvent : null}
                     row={row}
                     col={col}
                 ></Tile>
