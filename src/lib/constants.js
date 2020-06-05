@@ -37,4 +37,5 @@ module.exports = Object.freeze({
     MODE_MEDIUM: 1,
     MODE_HARD: 2,
     MODE_CUSTOM: 3,
+    MODES: ['Easy', 'Medium', 'Hard', 'Custom']
 });

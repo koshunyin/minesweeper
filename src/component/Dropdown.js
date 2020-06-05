@@ -11,7 +11,7 @@ export default class Dropdown extends React.Component {
 
     render() {
         let arr = [];
-        let modes = ['Easy', 'Medium', 'Hard', 'Custom'];
+        let modes = constants.MODES;
         for (let i = 0, n = modes.length; i < n; i++) {
             arr.push(
                 <option

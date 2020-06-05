@@ -1,4 +1,5 @@
 import { Grid, Box } from '@material-ui/core';
+import { FacebookShareButton, FacebookIcon } from 'react-share';
 import React from 'react';
 import Board from './Board';
 import Counter from './Counter';
@@ -13,6 +14,11 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
 
+    this.time = 0;
+    this.restart_count = 0;  // Note: change this will force restasrt
+    this.flag_count = 0;
+    this.win = false;
+
     this.settings = {
       board_width: 30,
       board_height: 16,
@@ -21,10 +27,7 @@ export default class App extends React.Component {
     };
 
     this.state = {
-      restart_count: 0,  // Note: change this will force restasrt
-      flag_count: 0,
-      time: 0,
-      button_status: constants.BUTTON_INIT,
+      button_status: constants.BUTTON_INIT
     };
   }
 
@@ -40,10 +43,12 @@ export default class App extends React.Component {
   restartGame = () => {
     // Force a restart
     clearInterval(this.timer);
+    this.win = false;
+    this.time = 0;
+    this.flag_count = 0;
+    this.restart_count++;
+
     this.setState({
-      restart_count: this.state.restart_count + 1,
-      flag_count: 0,
-      time: 0,
       button_status: constants.BUTTON_INIT
     });
   }
@@ -54,23 +59,26 @@ export default class App extends React.Component {
   }
 
   handleGameStatus = (status) => {
-    // Game start
-    if (status === constants.GAME_STATUS_START) {
-      this.timer = setInterval(() => this.setState({
-        time: this.state.time + 1
-      }), 1000);
-    }
-
-    // Game end
-    else {
-      clearInterval(this.timer);
+    switch(status){
+      case constants.GAME_STATUS_START:
+        this.timer = setInterval(() => this.time++, 1000);
+        this.win = false;
+        break;
+      case constants.GAME_STATUS_WIN:
+        clearInterval(this.timer);
+        this.win = true;
+        break;
+      case constants.GAME_STATUS_LOSE:
+        clearInterval(this.timer);
+        break;
+      default:
     }
 
     this.setState({ button_status: status });
   }
 
   handleFlagChange = (flagged) => {
-    this.setState({ flag_count: this.state.flag_count + (flagged ? 1 : -1) });
+    flagged ? this.flag_count++ : this.flag_count--;
   }
 
   handleDropdownChange = (mode) => {
@@ -108,6 +116,14 @@ export default class App extends React.Component {
   }
 
   render() {
+    let fb_button = this.win ? 
+      <FacebookShareButton
+        url="https://mine-sweeper.now.sh/"
+        quote={"I beat a Minesweeper (" + constants.MODES[this.settings.mode] + ", " + this.settings.board_width + "x" + this.settings.board_height + ", " + this.settings.bomb_count + " bombs) in " + this.time + " seconds!"}
+      ><FacebookIcon size={20} round></FacebookIcon></FacebookShareButton>
+      : null;
+      
+
     return (
       <div
         id='app'
@@ -129,7 +145,7 @@ export default class App extends React.Component {
           >
             <Box ml={1}>
               <Dropdown
-                key={this.state.restart_count}
+                key={this.restart_count}
                 mode={this.settings.mode}
                 notifyChange={this.handleDropdownChange}
               ></Dropdown>
@@ -137,7 +153,7 @@ export default class App extends React.Component {
 
             <Box ml={1}>
               <NumberInput
-                key={this.state.restart_count}
+                key={this.restart_count}
                 name='Width'
                 value={this.settings.board_width}
                 min={constants.BOARD_WIDTH_MIN}
@@ -148,7 +164,7 @@ export default class App extends React.Component {
 
             <Box ml={1}>
               <NumberInput
-                key={this.state.restart_count}
+                key={this.restart_count}
                 name='Height'
                 value={this.settings.board_height}
                 min={constants.BOARD_HEIGHT_MIN}
@@ -159,7 +175,7 @@ export default class App extends React.Component {
 
             <Box ml={1}>
               <NumberInput
-                key={this.state.restart_count}
+                key={this.restart_count}
                 name='Bombs'
                 value={this.settings.bomb_count}
                 min={1}
@@ -175,16 +191,19 @@ export default class App extends React.Component {
           onContextMenu={(e) => { e.preventDefault() }}
         >
           <div id='header'>
-            <Counter value={this.settings.bomb_count - this.state.flag_count} />
-            <Button
-              notifyClick={this.handleSmileyClick}
-              status={this.state.button_status}
-            ></Button>
-            <Counter value={this.state.time} />
+            <Counter value={this.settings.bomb_count - this.flag_count} />
+            <div>
+              <Button
+                notifyClick={this.handleSmileyClick}
+                status={this.state.button_status}
+              ></Button>
+              {fb_button}
+            </div>
+            <Counter value={this.time} />
           </div>
 
           <Board
-            key={this.state.restart_count}
+            key={this.restart_count}
             board_width={this.settings.board_width}
             board_height={this.settings.board_height}
             bomb_count={this.settings.bomb_count}
