@@ -2,7 +2,6 @@ import React from "react";
 import Tile from './Tile';
 import './Board.css';
 const arr2D = require('../lib/arr2D');
-const arrUtil = require('../lib/arrUtil');
 const constants = require('../lib/constants');
 const minesweeper = require('../lib/minesweeper');
 
@@ -10,13 +9,13 @@ export default class Board extends React.Component {
     constructor(props) {
         super(props);
 
-        this.tile_value = arr2D.create(this.props.board_height, this.props.board_width, 0); // Empty board
+        this.tile_value = arr2D.create(this.props.board_height, this.props.board_width, 0);
         this.non_bomb_tiles = this.props.board_width * this.props.board_height - this.props.bomb_count;
         this.state = {
             enabled: true,
             started: false,
             mouse_button: 0,
-            peek: [],
+            peek: arr2D.create(this.props.board_height, this.props.board_width, false),
             tile_state: arr2D.create(this.props.board_height, this.props.board_width, constants.TILE_STATE_INIT)
         };
     }
@@ -91,20 +90,28 @@ export default class Board extends React.Component {
         }
     }
 
+    // Peek 1 tile
     peekTile = (row, col, active) => {
-        let id = this.getId(row, col);
+        this.setState({ peek: arr2D.update(this.state.peek, row, col, active) });
+        this.props.notifyTilePeek(active);
+    }
+
+    // Peek 9 tiles
+    peekTileAdj = (row, col, active) => {
         let arr = this.state.peek;
-        if (active)
-            arr.push(id);
-        else
-            arr = arrUtil.remove(arr, id);
+
+        arr2D.callFnOnAdj(arr, row, col, (i, j) => {
+            arr[i][j] = active;
+        });
 
         this.setState({ peek: arr });
         this.props.notifyTilePeek(active);
     }
 
+    // Quit peek mode
     peekTileReset = () => {
-        this.setState({ peek: [] });
+        console.log('hi');
+        this.setState({ peek: arr2D.create(this.props.board_height, this.props.board_width, false) });
         this.props.notifyTilePeek(false);
     }
 
@@ -129,9 +136,7 @@ export default class Board extends React.Component {
                     break;
                 case constants.MOUSE_BOTH:
                 case constants.MOUSE_MIDDLE:
-                    arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
-                        this.peekTile(i, j, true);
-                    });
+                    this.peekTileAdj(row, col, true);
                     break;
                 default: // Do Nothing
             }
@@ -143,9 +148,7 @@ export default class Board extends React.Component {
                     break;
                 case constants.MOUSE_BOTH:
                 case constants.MOUSE_MIDDLE:
-                    arr2D.callFnOnAdj(this.tile_value, row, col, (i, j) => {
-                        this.peekTile(i, j, false);
-                    });
+                    this.peekTileAdj(row, col, false);
                     break;
                 default: // Do Nothing
             }
@@ -239,7 +242,7 @@ export default class Board extends React.Component {
                 let id = this.getId(row, col);
                 arr.push(<Tile
                     key={id}
-                    peek={this.state.peek.includes(id)}
+                    peek={this.state.peek[row][col]}
                     tile_value={this.tile_value[row][col]}
                     tile_state={this.state.tile_state[row][col]}
                     notifyMouseEvent={this.state.enabled ? this.handleTileMouseEvent : null}
