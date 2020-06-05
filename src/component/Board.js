@@ -110,7 +110,6 @@ export default class Board extends React.Component {
 
     // Quit peek mode
     peekTileReset = () => {
-        console.log('hi');
         this.setState({ peek: arr2D.create(this.props.board_height, this.props.board_width, false) });
         this.props.notifyTilePeek(false);
     }
