@@ -120,7 +120,7 @@ export default class App extends React.Component {
       <p><span>Share your victory on : </span>
       <FacebookShareButton
         url="https://mine-sweeper.now.sh/"
-        quote={"I beat a Minesweeper (" + constants.MODES[this.settings.mode] + ": " + this.settings.board_width + "x" + this.settings.board_height + ", " + this.settings.bomb_count + " bombs) in " + this.time + " seconds!"}
+        quote={"I beat Minesweeper (" + constants.MODES[this.settings.mode] + ": " + this.settings.board_width + "x" + this.settings.board_height + ", " + this.settings.bomb_count + " bombs) in " + this.time + " seconds!"}
       ><FacebookIcon size={20} round></FacebookIcon></FacebookShareButton>
       </p>
       : null;
