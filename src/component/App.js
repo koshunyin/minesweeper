@@ -38,7 +38,6 @@ export default class App extends React.Component {
       scrollX: 0,
       scrollY: -window.scrollY
     }).then(function (canvas) {
-      document.body.append(canvas);
       let a = document.createElement('a');
       a.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
       a.download = 'MineSweeper.png';
