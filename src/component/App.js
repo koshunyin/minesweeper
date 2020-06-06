@@ -116,11 +116,13 @@ export default class App extends React.Component {
   }
 
   render() {
-    let fb_button = this.win ? 
+    let win_msg = this.win ? 
+      <p><span>Share your victory on : </span>
       <FacebookShareButton
         url="https://mine-sweeper.now.sh/"
-        quote={"I beat a Minesweeper (" + constants.MODES[this.settings.mode] + ", " + this.settings.board_width + "x" + this.settings.board_height + ", " + this.settings.bomb_count + " bombs) in " + this.time + " seconds!"}
+        quote={"I beat a Minesweeper (" + constants.MODES[this.settings.mode] + ": " + this.settings.board_width + "x" + this.settings.board_height + ", " + this.settings.bomb_count + " bombs) in " + this.time + " seconds!"}
       ><FacebookIcon size={20} round></FacebookIcon></FacebookShareButton>
+      </p>
       : null;
       
 
@@ -186,6 +188,8 @@ export default class App extends React.Component {
           </Grid>
         </Box>
 
+        {win_msg}
+
         <div
           style={{ width: this.settings.board_width * constants.TILE_HEIGHT, height: this.settings.board_height * constants.TILE_HEIGHT }}
           onContextMenu={(e) => { e.preventDefault() }}
@@ -197,7 +201,6 @@ export default class App extends React.Component {
                 notifyClick={this.handleSmileyClick}
                 status={this.state.button_status}
               ></Button>
-              {fb_button}
             </div>
             <Counter value={this.time} />
           </div>
