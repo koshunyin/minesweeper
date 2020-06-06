@@ -1,5 +1,6 @@
 import { Grid, Box } from '@material-ui/core';
 import { FacebookShareButton, FacebookIcon } from 'react-share';
+import html2canvas from 'html2canvas';
 import React from 'react';
 import Board from './Board';
 import Counter from './Counter';
@@ -8,7 +9,7 @@ import Dropdown from './Dropdown';
 import NumberInput from './NumberInput';
 import './App.css';
 const constants = require('../lib/constants');
-
+const sprite = require('../sprite.png');
 
 export default class App extends React.Component {
   constructor(props) {
@@ -18,6 +19,7 @@ export default class App extends React.Component {
     this.restart_count = 0;  // Note: change this will force restasrt
     this.flag_count = 0;
     this.win = false;
+    this.screenshot = '';
 
     this.settings = {
       board_width: 30,
@@ -29,6 +31,19 @@ export default class App extends React.Component {
     this.state = {
       button_status: constants.BUTTON_INIT
     };
+  }
+
+  downloadScreenshot = () => {
+    html2canvas(document.getElementById('board'), {
+      scrollX: 0,
+      scrollY: -window.scrollY
+    }).then(function (canvas) {
+      document.body.append(canvas);
+      let a = document.createElement('a');
+      a.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+      a.download = 'MineSweeper.png';
+      a.click();
+    });
   }
 
   handleKeyDown = (e) => {
@@ -59,7 +74,7 @@ export default class App extends React.Component {
   }
 
   handleGameStatus = (status) => {
-    switch(status){
+    switch (status) {
       case constants.GAME_STATUS_START:
         this.timer = setInterval(() => this.time++, 1000);
         this.win = false;
@@ -116,15 +131,25 @@ export default class App extends React.Component {
   }
 
   render() {
-    let win_msg = this.win ? 
-      <p><span>Share your victory on : </span>
-      <FacebookShareButton
-        url="https://mine-sweeper.now.sh/"
-        quote={"I beat Minesweeper (" + constants.MODES[this.settings.mode] + ": " + this.settings.board_width + "x" + this.settings.board_height + ", " + this.settings.bomb_count + " bombs) in " + this.time + " seconds!"}
-      ><FacebookIcon size={20} round></FacebookIcon></FacebookShareButton>
-      </p>
+    let screenshot_button = <div className="tooltip">
+      <i onClick={this.downloadScreenshot} className="fa fa-camera pointer"></i>
+      <span className="tooltiptext">Download screenshot</span>
+    </div>;
+    let win_msg = this.win ?
+      <div>
+        <p><span>Share your victory on : </span>
+          <FacebookShareButton
+            children={sprite}
+            url="https://mine-sweeper.now.sh/"
+            quote={"I beat Minesweeper (" + constants.MODES[this.settings.mode] + ": " + this.settings.board_width + "x" + this.settings.board_height + ", " + this.settings.bomb_count + " bombs) in " + this.time + " seconds! "}
+          ><FacebookIcon size={20} round></FacebookIcon></FacebookShareButton>
+        </p>
+        <p>
+          <span>Download screenshot: </span>{screenshot_button}
+        </p>
+      </div>
       : null;
-      
+
 
     return (
       <div
@@ -191,38 +216,54 @@ export default class App extends React.Component {
         {win_msg}
 
         <div
-          style={{ width: this.settings.board_width * constants.TILE_HEIGHT, height: this.settings.board_height * constants.TILE_HEIGHT }}
+          style={{ width: this.settings.board_width * constants.TILE_HEIGHT }}
           onContextMenu={(e) => { e.preventDefault() }}
         >
-          <div id='header'>
-            <Counter value={this.settings.bomb_count - this.flag_count} />
-            <div>
-              <Button
-                notifyClick={this.handleSmileyClick}
-                status={this.state.button_status}
-              ></Button>
+          <div id='board'>
+            <div id='header'>
+              <Counter value={this.settings.bomb_count - this.flag_count} />
+              <div>
+                <Button
+                  notifyClick={this.handleSmileyClick}
+                  status={this.state.button_status}
+                ></Button>
+              </div>
+              <Counter value={this.time} />
             </div>
-            <Counter value={this.time} />
+
+            <Board
+              key={this.restart_count}
+              board_width={this.settings.board_width}
+              board_height={this.settings.board_height}
+              bomb_count={this.settings.bomb_count}
+              notifyFlagChange={this.handleFlagChange}
+              notifyGameStatus={this.handleGameStatus}
+              notifyTilePeek={this.handleTilePeek}
+            />
           </div>
 
-          <Board
-            key={this.restart_count}
-            board_width={this.settings.board_width}
-            board_height={this.settings.board_height}
-            bomb_count={this.settings.bomb_count}
-            notifyFlagChange={this.handleFlagChange}
-            notifyGameStatus={this.handleGameStatus}
-            notifyTilePeek={this.handleTilePeek}
-          />
-
           <footer>
-            <p>
-              Samuel Ko | <a href="mailto:koshunyin@gmail.com">
-                <i className="fa fa-envelope"></i>
-              </a> | <a target="_blank" rel="noopener noreferrer" href="https://github.com/koshunyin/minesweeper">
-                <i className="fa fa-github"></i>
-              </a>
-            </p>
+            <div>
+              <span>Samuel Ko | </span>
+              <div className="tooltip">
+                <a href="mailto:koshunyin@gmail.com">
+                  <i className="fa fa-envelope"></i>
+                </a>
+                <span className="tooltiptext">Email me</span>
+              </div>
+              <span> | </span>
+              <div className="tooltip">
+                <a target="_blank" rel="noopener noreferrer" href="https://github.com/koshunyin/minesweeper">
+                  <i className="fa fa-github"></i>
+                </a>
+                <span className="tooltiptext">See source code</span>
+              </div>
+              <span> | </span>
+              <div className="tooltip">
+                <i onClick={this.downloadScreenshot} className="fa fa-camera pointer"></i>
+                <span className="tooltiptext">Download screenshot</span>
+              </div>
+            </div>
           </footer>
         </div>
       </div>

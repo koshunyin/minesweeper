@@ -9,6 +9,9 @@
 }
 
 #app {
-  outline:none;
+  outline: none;
 }
 
+#board {
+  background-color: lightyellow;
+}

@@ -85,12 +85,6 @@ exports.callFnOnAdj = (arr, row, col, fn) => {
   }
 }
 
-// Update arr[row][col] with val
-exports.update = (arr, row, col, val) => {
-  arr[row][col] = val;
-  return arr;
-}
-
 // Get count of val in arr
 exports.getCount = (arr, val) => {
   let count = 0;
