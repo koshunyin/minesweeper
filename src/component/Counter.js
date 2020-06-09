@@ -3,13 +3,22 @@ import './Counter.css';
 const constants = require('../lib/constants');
 
 export default class Counter extends React.Component {
-    
+
     render() {
         let min_digits = 3;
         let arr = [];
-        let x = Math.max(0, Math.floor(this.props.value));
+        let x = Math.abs(Math.floor(this.props.value));
         let len = Math.ceil(Math.log10(x + 1)); // Number of digits
         len = len < min_digits ? min_digits : len;
+
+        // Negative value
+        if (this.props.value < 0) {
+            arr.push(<div
+                key='-1'
+                className='comp-counter-digit'
+                style={{ backgroundPosition: '-16px -' + 10 * constants.DIGIT_HEIGHT + 'px' }}
+            ></div>)
+        }
 
         // Display digits
         for (let i = len - 1; i >= 0; i--) {
