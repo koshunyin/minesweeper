@@ -14,7 +14,7 @@ export default class Counter extends React.Component {
         // Negative value
         if (this.props.value < 0) {
             arr.push(<div
-                key='-1'
+                key='-'
                 className='comp-counter-digit'
                 style={{ backgroundPosition: '-16px -' + 10 * constants.DIGIT_HEIGHT + 'px' }}
             ></div>)
