@@ -45,7 +45,8 @@ export default class Board extends React.Component {
 
         // If flagged or clicked, do nothing
         else if (this.tile_state[row][col] === constants.TILE_STATE_FLAGGED
-            || this.tile_state[row][col] === constants.TILE_STATE_CLICKED) {
+            || this.tile_state[row][col] === constants.TILE_STATE_CLICKED
+            || this.tile_state[row][col] === constants.TILE_STATE_NO_BOMB) {
         }
 
         // If it's bomb, game over
@@ -58,28 +59,28 @@ export default class Board extends React.Component {
             // Click the tile
             this.tile_state[row][col] = constants.TILE_STATE_CLICKED;
 
+            // If tile is zero, click adjacent non-bomb tiles
+            this.tile_state = minesweeper.OpenNonBombAdj(this.tile_value, this.tile_state, row, col, constants.BOMB_VALUE, constants.TILE_STATE_FLAGGED, constants.TILE_STATE_CLICKED);
+
             // Check whether win
             if (arr2D.getCount(this.tile_state, constants.TILE_STATE_CLICKED) === this.non_bomb_tiles) {
                 this.handleGameWin();
-            }
-
-            // If tile is zero, click adjacent non-bomb tiles
-            else if (this.tile_value[row][col] === 0) {
-                this.tile_state = minesweeper.OpenNonBombAdj(this.tile_value, this.tile_state, row, col, constants.BOMB_VALUE, constants.TILE_STATE_FLAGGED, constants.TILE_STATE_CLICKED);
             }
         }
     }
 
     // Toggle flag on tile if not clicked
     flagTile = (row, col) => {
-        if (this.tile_state[row][col] !== constants.TILE_STATE_CLICKED) {
-            if (this.tile_state[row][col] === constants.TILE_STATE_FLAGGED) {
-                this.tile_state[row][col] = constants.TILE_STATE_INIT;
-                this.props.notifyFlagChange(false);
-            }
-            else if (this.tile_state[row][col] === constants.TILE_STATE_INIT) {
-                this.tile_state[row][col] = constants.TILE_STATE_FLAGGED;
-                this.props.notifyFlagChange(true);
+        if (this.started) {
+            if (this.tile_state[row][col] !== constants.TILE_STATE_CLICKED) {
+                if (this.tile_state[row][col] === constants.TILE_STATE_FLAGGED) {
+                    this.tile_state[row][col] = constants.TILE_STATE_INIT;
+                    this.props.notifyFlagChange(false);
+                }
+                else if (this.tile_state[row][col] === constants.TILE_STATE_INIT) {
+                    this.tile_state[row][col] = constants.TILE_STATE_FLAGGED;
+                    this.props.notifyFlagChange(true);
+                }
             }
         }
     }

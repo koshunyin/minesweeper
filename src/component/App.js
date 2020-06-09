@@ -15,10 +15,7 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
 
-    this.time = 0;
     this.restart_count = 0;  // Note: change this will force restasrt
-    this.flag_count = 0;
-    this.win = false;
     this.screenshot = '';
 
     this.settings = {
@@ -29,7 +26,10 @@ export default class App extends React.Component {
     };
 
     this.state = {
-      button_status: constants.BUTTON_INIT
+      button_status: constants.BUTTON_INIT,
+      time: 0,
+      win: false,
+      flag_count: 0
     };
   }
 
@@ -57,13 +57,13 @@ export default class App extends React.Component {
   restartGame = () => {
     // Force a restart
     clearInterval(this.timer);
-    this.win = false;
-    this.time = 0;
-    this.flag_count = 0;
     this.restart_count++;
 
     this.setState({
-      button_status: constants.BUTTON_INIT
+      button_status: constants.BUTTON_INIT,
+      time: 0,
+      flag_count: 0,
+      win: false
     });
   }
 
@@ -75,12 +75,12 @@ export default class App extends React.Component {
   handleGameStatus = (status) => {
     switch (status) {
       case constants.GAME_STATUS_START:
-        this.timer = setInterval(() => this.time++, 1000);
-        this.win = false;
+        this.timer = setInterval(() => this.setState({ time: this.state.time + 1 }), 1000);
+        this.setState({ win: false });
         break;
       case constants.GAME_STATUS_WIN:
         clearInterval(this.timer);
-        this.win = true;
+        this.setState({ win: true });
         break;
       case constants.GAME_STATUS_LOSE:
         clearInterval(this.timer);
@@ -92,7 +92,9 @@ export default class App extends React.Component {
   }
 
   handleFlagChange = (flagged) => {
-    flagged ? this.flag_count++ : this.flag_count--;
+    flagged ?
+      this.setState({ flag_count: this.state.flag_count + 1 }) :
+      this.setState({ flag_count: this.state.flag_count - 1 });
   }
 
   handleDropdownChange = (mode) => {
@@ -130,22 +132,25 @@ export default class App extends React.Component {
   }
 
   render() {
-    let screenshot_button = <div className="tooltip">
-      <i onClick={this.downloadScreenshot} className="fa fa-camera pointer"></i>
-      <span className="tooltiptext">Download screenshot</span>
-    </div>;
-    let win_msg = this.win ?
+    let screenshot_button =
+      <div className="tooltip">
+        <i onClick={this.downloadScreenshot} className="fa fa-camera pointer"></i>
+        <span className="tooltiptext">Download screenshot</span>
+      </div>;
+
+    let win_msg = this.state.win ?
       <div>
-        <p><span>Share your victory on : </span>
+        <div>
+          <span>Share your victory on : </span>
           <FacebookShareButton
             children={sprite}
             url="https://mine-sweeper.now.sh/"
-            quote={"I beat Minesweeper (" + constants.MODES[this.settings.mode] + ": " + this.settings.board_width + "x" + this.settings.board_height + ", " + this.settings.bomb_count + " bombs) in " + this.time + " seconds! "}
+            quote={"I beat Minesweeper (" + constants.MODES[this.settings.mode] + ": " + this.settings.board_width + "x" + this.settings.board_height + ", " + this.settings.bomb_count + " bombs) in " + this.state.time + " seconds! "}
           ><FacebookIcon size={20} round></FacebookIcon></FacebookShareButton>
-        </p>
-        <p>
+        </div>
+        <div>
           <span>Download screenshot: </span>{screenshot_button}
-        </p>
+        </div>
       </div>
       : null;
 
@@ -220,14 +225,14 @@ export default class App extends React.Component {
         >
           <div id='board'>
             <div id='header'>
-              <Counter value={this.settings.bomb_count - this.flag_count} />
+              <Counter value={this.settings.bomb_count - this.state.flag_count} />
               <div>
                 <Button
                   notifyClick={this.handleSmileyClick}
                   status={this.state.button_status}
                 ></Button>
               </div>
-              <Counter value={this.time} />
+              <Counter value={this.state.time} />
             </div>
 
             <Board
